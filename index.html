@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Technical Touch — Guest Network</title>
+<style>
+  :root {
+    --bg: #2E2B5F;
+    --accent: #2FA9BF;
+    --text: #E3536C;        /* body text colour from designer */
+    --heading: #000000;
+    --btn-bg: #3A98FF;
+    --btn-text: #FFFFFF;
+    --link: #3A98FF;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    padding: 1.5rem;
+  }
+  .card {
+    max-width: 420px; width: 100%;
+    background: rgba(0,0,0,0.55);
+    border-radius: 16px;
+    padding: 2rem;
+    text-align: center;
+  }
+  .logo { width: 140px; margin-bottom: 1rem; }
+  h1 { color: #fff; font-size: 1.4rem; margin-bottom: 0.75rem; }
+  .welcome { color: var(--accent); font-weight: 600; margin-bottom: 1rem; }
+  .terms {
+    background: rgba(255,255,255,0.08);
+    border-radius: 10px;
+    padding: 1rem;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    color: #d8d8e8;
+    text-align: left;
+    margin-bottom: 1.25rem;
+  }
+  .terms a { color: var(--link); text-decoration: underline; }
+  .btn {
+    display: block; width: 100%;
+    background: var(--btn-bg); color: var(--btn-text);
+    border: 0; border-radius: 10px;
+    font-size: 1.05rem; font-weight: 600;
+    padding: 0.85rem;
+    cursor: pointer;
+  }
+  .btn:hover { filter: brightness(1.1); }
+  .status { color: #fff; margin-top: 1rem; font-size: 0.9rem; display: none; }
+</style>
+</head>
+<body>
+  <main class="card">
+    <img class="logo" src="ttt-logo.png" alt="The Technical Touch">
+    <h1>Welcome to The Technical Touch Guest Network!</h1>
+    <p class="welcome">Please accept the Terms of Service to enjoy complimentary internet access.</p>
+    <div class="terms">
+      By using this network you agree to our
+      <a href="https://thetechnicaltouch.com.au/terms.html" target="_blank">Terms of Service</a>
+      and <a href="https://thetechnicaltouch.com.au/privacy.html" target="_blank">Privacy Policy</a>.
+      Access is provided as-is, filtered, and logged. Enjoy!
+    </div>
+    <button class="btn" id="accept">Accept</button>
+    <p class="status" id="status">Connecting you to the network…</p>
+  </div>
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const mac  = params.get("id");          // client MAC — set by UniFi
+  const ap   = params.get("ap");          // AP MAC — set by UniFi
+  const t    = params.get("t") || "28800";
+  const url  = params.get("url");
+
+  document.getElementById("accept").addEventListener("click", async () => {
+    const status = document.getElementById("status");
+    status.style.display = "block";
+    status.textContent = "Authorising…";
+    try {
+      const res = await fetch("/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ mac, ap, t })
+      });
+      if (!res.ok) throw new Error();
+      status.textContent = "Welcome to The Technical Touch!";
+      setTimeout(() => {
+        window.location.href = url || "https://thetechnicaltouch.com.au";
+      }, 1500);
+    } catch (e) {
+      status.textContent = "Something went wrong — please try again.";
+    }
+  });
+</script>
+</body>
+</html>
